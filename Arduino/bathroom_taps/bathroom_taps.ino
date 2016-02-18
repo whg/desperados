@@ -5,12 +5,12 @@
 
 //#define DEBUG
 
-const int hobPot1CCNumber = 18;
-const int hobPot2CCNumber = 19;
+const int bathSink1CCNumber = 16;
+const int bathSink2CCNumber = 17;
 
-const int hobPot1Pin = A0;
-const int hobPot2Pin = A3;
-int hobPot1Val, hobPot2Val;
+const int bathSink1Pin = A0;
+const int bathSink2Pin = A1;
+int bathSink1Val, bathSink2Val;
 
 void setup() {
 
@@ -20,19 +20,19 @@ void setup() {
   Serial.begin(31250);
 #endif
 
-  pinMode(hobPot1Pin, INPUT);
-  pinMode(hobPot2Pin, INPUT);
+  pinMode(bathSink1Pin, INPUT);
+  pinMode(bathSink2Pin, INPUT);
 
-  hobPot1Val = hobPot2Val = 0;
+  bathSink1Val = bathSink2Val = 0;
 }
 
 
 void loop() {
 
   
-  int p1v = analogRead(hobPot1Pin);
+  int p1v = analogRead(bathSink1Pin);
   static int p1OverTimes = 0;
-  if (abs(p1v- hobPot1Val) > KNOB_THRESHOLD) {
+  if (abs(p1v- bathSink1Val) > KNOB_THRESHOLD) {
     p1OverTimes++;
   }
   else {
@@ -40,17 +40,17 @@ void loop() {
   }
 
   if (p1OverTimes > 10) {
-    hobPot1Val = p1v;
-    sendMidi(CONTROL_CHANGE, 1, hobPot1CCNumber, map(hobPot1Val, 0, 1024, 0, 127));
+    bathSink1Val = p1v;
+    sendMidi(CONTROL_CHANGE, 1, bathSink1CCNumber, map(bathSink1Val, 0, 1024, 0, 127));
   }
 
 #ifdef DEBUG
   Serial.println(p1v);
 #endif
 
-  int p2v = analogRead(hobPot2Pin);
+  int p2v = analogRead(bathSink2Pin);
   static int p2OverTimes = 0;
-  if (abs(p2v- hobPot2Val) > KNOB_THRESHOLD) {
+  if (abs(p2v- bathSink2Val) > KNOB_THRESHOLD) {
     p2OverTimes++;
   }
   else {
@@ -58,8 +58,8 @@ void loop() {
   }
 
   if (p2OverTimes > 10) {
-    hobPot2Val = p2v;
-    sendMidi(CONTROL_CHANGE, 1, hobPot2CCNumber, map(hobPot2Val, 0, 1024, 0, 127));
+    bathSink2Val = p2v;
+    sendMidi(CONTROL_CHANGE, 1, bathSink2CCNumber, map(bathSink2Val, 0, 1024, 0, 127));
   }
 
   delay(1);

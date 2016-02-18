@@ -3,13 +3,15 @@ volatile uint16_t secondsElapsed = 0, frameCount = 0, c2 = 0;
 #include <TimerOne.h>
 #include "data.h"
 
+#define MAX_ANALOG_VAL 788
+
 volatile uint16_t globalTime = 700;
 
 const uint16_t NUM_COLS = 4;
 const uint16_t NUM_ROWS = 1;
 const uint16_t NUM_DIGITS = NUM_COLS * NUM_ROWS;
 const uint16_t FRAME_LENGTH = 40; //in millis
-const uint8_t  NUM_FRAMES_IN_SEC = 40 / FRAME_LENGTH;
+const uint8_t  NUM_FRAMES_IN_SEC = 1; //1000 / FRAME_LENGTH;
 const uint16_t COUNTER_REDUCTION = FRAME_LENGTH / NUM_COLS * NUM_COLS;
 #define INDEX(row, col) ((row) * NUM_COLS + (col))
 
@@ -35,6 +37,16 @@ int clearPin = A4;
 int shift = 0;
 char *message = "HELO";
 
+uint8_t meterInPin = A5;
+uint16_t analogVal;
+
+#define NLEDS 2
+#define LED_ON_TIME 100
+
+uint8_t ledPins[NLEDS] = { 9, 10 };
+uint8_t ledStates[NLEDS] = { LOW, LOW };
+long ledOnTimes[NLEDS];
+
 void mainTimer();
 
 const uint8_t NUM_BUFFERS = 1;
@@ -56,122 +68,10 @@ inline void centralTime(uint16_t time) {
   for (uint8_t i = 0; i < 4; i++) {
     uint8_t d = time % 10;
     time /= 10;
-    frameBuffer[i] = numbers[d];
-  }
-  //    frameBuffer[3] = numbers[2];
-
-  //    if ((frameCount / 5) % 2) frameBuffer[17] |= 128;
-}
-
-inline void allTime(uint16_t time) {
-
-  uint8_t *frameBuffer = nextBuffer();
-
-  for (uint8_t i = 0; i < 4; i++) {
-    uint8_t d = time % 10;
-    time /= 10;
-    for (uint8_t j = 0; j < 9; j++) {
-      frameBuffer[j * 4 + 3 - i] = numbers[d];
-    }
-  }
-
-  for (uint8_t j = 0; j < 9; j++) {
-    frameBuffer[j * 4 + 1] |= 128;
-  }
-
-}
-
-inline void singleDigitBigTime(uint16_t time) {
-  uint8_t *frameBuffer = nextBuffer();
-
-  uint8_t k, v;
-  for (int8_t i = 3; i >= 0; i--) {
-    v = time % 10;
-    time /= 10;
-
-    for (uint8_t r = 0; r < 3; r++) {
-      for (uint8_t c = 0; c < 3; c++) {
-        k = INDEX(r, c + i * 3);
-        frameBuffer[k] = numbers[v];
-      }
-    }
+    frameBuffer[3-i] = numbers[d];
   }
 }
 
-inline uint8_t numberIndex(uint8_t row, uint8_t col) {
-  return col % 3 + row * 3;
-}
-
-inline void bigTime(uint16_t time) {
-
-  uint8_t *frameBuffer = nextBuffer();
-
-  uint8_t k, v;
-  for (int8_t i = 3; i >= 0; i--) {
-    v = time % 10;
-    time /= 10;
-
-    for (uint8_t r = 0; r < 3; r++) {
-      for (uint8_t c = 0; c < 3; c++) {
-        k = INDEX(r, c + i * 3);
-        frameBuffer[k] = characters[v][r * 3 + c];
-      }
-    }
-  }
-}
-
-inline void oldDigitsTime(uint16_t time) {
-
-
-  uint8_t *frameBuffer = nextBuffer();
-
-  uint8_t k, v;
-  for (int8_t i = 3; i >= 0; i--) {
-    v = time % 10;
-    time /= 10;
-
-    for (uint8_t r = 0; r < 3; r++) {
-      for (uint8_t c = 0; c < 3; c++) {
-        k = INDEX(r, c + i * 3);
-        frameBuffer[k] = tbtNumbers[v][r * 3 + c];
-      }
-    }
-  }
-}
-
-inline void allEights(uint16_t _) {
-
-  uint8_t *frameBuffer = nextBuffer();
-  for (uint8_t i = 0; i < NUM_DIGITS; frameBuffer[i] = 255, i++);
-}
-
-inline void timeUnits(uint16_t t) {
-
-  uint8_t *frameBuffer = nextBuffer();
-  uint8_t units = numbers[t % 10];
-  for (uint8_t i = 0; i < NUM_DIGITS; frameBuffer[i] = units, i++);
-}
-
-typedef void (*displayFunction)(uint16_t);
-
-
-volatile displayFunction displayFuncs[] = {
-  centralTime,
-  //    /* allEights, */
-  //    allTime,
-  //    singleDigitBigTime,
-  //    bigTime,
-  //    centralTime,
-  //    timeUnits,
-  //    bigTime,
-  //    oldDigitsTime,
-  //    bigTime,
-  //    oldDigitsTime,
-  //    bigTime,
-  //    oldDigitsTime,
-
-};
-const uint8_t NUM_DISPLAY_FUNCS = 1;
 
 void setup() {
 
@@ -194,22 +94,33 @@ void setup() {
   pinMode(A3, OUTPUT);
 
 
-//  Timer1.initialize(1000);
-//  Timer1.attachInterrupt(mainTimer);
+  Timer1.initialize(1000);
+  Timer1.attachInterrupt(mainTimer);
 
   pinMode(clearPin, OUTPUT);
   digitalWrite(clearPin, LOW);
 
 
-  pinMode(A5, INPUT);
-  Serial.begin(9600);
+  pinMode(meterInPin, INPUT);
+  randomSeed(analogRead(meterInPin));
 }
-uint16_t analogVal;
-void loop() {
 
-  analogVal = analogRead(A5);
-  Serial.println(analogVal);
-  delay(50); 
+void loop() {
+  long timeNow = millis();
+  
+  for (int i = 0; i < NLEDS; i++) {
+    if (random(1000) < 2) { 
+      digitalWrite(ledPins[i], HIGH);
+      ledStates[i] = HIGH;  
+      ledOnTimes[i] = timeNow;
+    }
+    if (ledStates[i] == HIGH && (timeNow - ledOnTimes[i]) > LED_ON_TIME) {
+      digitalWrite(ledPins[i], LOW);
+      ledStates[i] = LOW;  
+    }
+  }
+  
+  analogVal = analogRead(meterInPin);
 }
 
 void lightDigits(uint8_t col) {
@@ -231,76 +142,10 @@ void lightDigits(uint8_t col) {
   }
 
 
-  PORTC = 15 ^ (1 << (3 - col));
+  PORTC = 15 ^ (1 << col);
 
 }
 
-
-volatile uint8_t interpolationOrders[][8] = {
-  { 2, 4, 1, 5, 6, 7, 3, 0 },
-  { 0, 3, 7, 6, 5, 4, 2, 1 },
-  { 1, 0, 7, 6, 5, 4, 3, 2 },
-  { 0, 5, 4, 1, 2, 6, 7, 3 },
-  { 1, 7, 6, 0, 3, 4, 5, 2 },
-  { 3, 0, 7, 5, 4, 6, 2, 1 },
-  { 4, 7, 1, 6, 3, 5, 2, 0 },
-  { 6, 5, 1, 3, 4, 7, 0, 2 },
-  { 2, 3, 1, 5, 6, 0, 7, 4 },
-  { 5, 2, 0, 7, 1, 3, 4, 6 },
-  { 6, 1, 0, 2, 5, 7, 3, 4 },
-  { 4, 5, 7, 3, 0, 1, 6, 2 },
-};
-
-const uint8_t NUM_ORDERS = 12;
-volatile uint8_t interpolationOrderCounter = 0;
-
-volatile uint8_t interpolationCounter = 0;
-
-
-volatile uint8_t dfc = 0;
-volatile displayFunction df;
-
-void secondCallback() {
-
-
-  interpolationCounter = 0;
-  interpolationOrderCounter = ++interpolationOrderCounter % NUM_ORDERS;
-
-  df = displayFuncs[dfc];
-
-
-  df(globalTime);
-  globalTime++;
-  /* displayFuncs[dfc](6789); */
-
-  // 0123456789
-  // 1234 0827
-
-  dfc = ++dfc % NUM_DISPLAY_FUNCS;
-}
-
-
-
-void interpolateFrames() {
-
-  /* static uint8_t c = 0; */
-  uint8_t c = interpolationOrders[interpolationOrderCounter][interpolationCounter];
-
-  uint8_t nfbc = (fbc + 1) % 2;
-
-  //    if (interpolationCounter < 8) {
-  //        for (uint8_t i = 0; i < NUM_DIGITS; i++) {
-  //            uint8_t segon = frameBuffers[fbc][i] & (1 << c);
-  //            currentFrame[i] ^= (-segon ^ currentFrame[i]) & (1 << c);
-  //        }
-  //        interpolationCounter++;
-  //    }
-  //    else {
-  for (uint8_t i = 0; i < NUM_DIGITS; i++) {
-    currentFrame[i] = frameBuffers[fbc][i];
-  }
-  //    }
-}
 
 byte thirteenhigh = 0;
 byte rising = true;
@@ -345,19 +190,12 @@ void mainTimer() {
     counter = counter % NUM_COLS;
 
     if (!(frameCount % NUM_FRAMES_IN_SEC)) {
-      centralTime(analogVal);
+      centralTime(8888);
+//      centralTime(analogVal * 10);
     }
 
   }
-
-
-  //    static int count = 0;
-  //    PORTD = numbers[(c2/10)%9];
-  //    PORTC = 0;
-  //
-  //    count = ++count % 9;
-
-
+  
   lightDigits((counter++) % NUM_COLS);
 }
 

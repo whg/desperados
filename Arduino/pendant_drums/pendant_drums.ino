@@ -5,9 +5,9 @@
 //#define DEBUG
 
 
-const int hitPins[4] = { 4, 5, 6, 7 };
+const int hitPins[5] = { 4, 5, 6, 7, 8 };
 const int numPins = sizeof(hitPins) / sizeof(int);
-const int noteNumbers[] = { 44, 45, 46, 47 };
+const int noteNumbers[] = { 36, 37, 38, 39, 40 };
 
 enum state_t { ON, OFF };
 state_t states[numPins];
@@ -42,11 +42,6 @@ void loop() {
   unsigned long timeNow = millis();
  
   for (uint8_t i = 0; i < numPins; i++) {
-//    Serial.print(i);
-//    Serial.print(" ");
-//    Serial.println(states[i]);
-//    Serial.print(" ");
-//    
     if (states[i] == OFF && digitalRead(hitPins[i]) == 0) {
       if ((timeNow - lastHits[i]) > NOTE_DURATION) {
         sendMidi(NOTE_ON, 1, noteNumbers[i], 120);

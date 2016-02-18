@@ -1,5 +1,7 @@
 #include <Encoder.h>
 
+const int blindCCNumber = 2;
+
 const int setStartButton = 2;
 const int setEndButton = 3;
 
@@ -8,7 +10,7 @@ const int setEndButton = 3;
 #define CONTROL_CHANGE 0b10110000
 
 Encoder encoder(A0, A1);
-long encoderPos, encoderStart, encoderEnd;
+long encoderPos, encoderStart, encoderEnd; 
 
 bool readEncoder() {
   static long oldPos = -999;
@@ -50,7 +52,7 @@ void loop() {
   }
   else if (encoderChanged && ENCODER_VAL_SET(encoderStart) && ENCODER_VAL_SET(encoderEnd)) {
     uint8_t value = constrain(map(encoderPos, encoderStart, encoderEnd, 0, 127), 0, 127);
-    sendMidi(CONTROL_CHANGE, 1, 14, value);
+    sendMidi(CONTROL_CHANGE, 1, blindCCNumber, value);
   }
 
 

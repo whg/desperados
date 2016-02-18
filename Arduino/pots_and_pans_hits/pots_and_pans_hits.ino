@@ -44,7 +44,7 @@ void loop() {
   for (uint8_t i = 0; i < numPins; i++) {
 
     if (states[i] == OFF && digitalRead(hitPins[i]) == 0) {
-      if ((timeNow - lastHits[i]) > NOTE_DURATION) {
+      if ((timeNow - lastHits[i]) > NOTE_DURATION && states[i] == OFF) {
         sendMidi(NOTE_ON, 1, noteNumbers[i], 120);
         lastHits[i] = timeNow;
         states[i] = ON;

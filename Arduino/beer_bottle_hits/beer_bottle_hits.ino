@@ -7,7 +7,8 @@
 
 const int hitPins[4] = { 4, 5, 6, 7 };
 const int numPins = sizeof(hitPins) / sizeof(int);
-const int noteNumbers[] = { 44, 45, 46, 47 };
+const int noteNumbers[] = { 59, 50, 54, 47 };
+const int midiChannel = 4;
 
 enum state_t { ON, OFF };
 state_t states[numPins];
@@ -49,7 +50,7 @@ void loop() {
 //    
     if (states[i] == OFF && digitalRead(hitPins[i]) == 0) {
       if ((timeNow - lastHits[i]) > NOTE_DURATION) {
-        sendMidi(NOTE_ON, 1, noteNumbers[i], 120);
+        sendMidi(NOTE_ON, midiChannel, noteNumbers[i], 120);
         lastHits[i] = timeNow;
         states[i] = ON;
         
@@ -60,7 +61,7 @@ void loop() {
   
   for (uint8_t i = 0; i < numPins; i++) {
     if (states[i] == ON && (timeNow - lastHits[i]) > NOTE_DURATION) {
-      sendMidi(NOTE_OFF, 1, noteNumbers[i], 0);
+      sendMidi(NOTE_OFF, midiChannel, noteNumbers[i], 0);
       states[i] = OFF;
 
       digitalWrite(LED_PIN, LOW);

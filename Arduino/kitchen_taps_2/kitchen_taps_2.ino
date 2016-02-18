@@ -21,6 +21,8 @@ int kitchTap1Val, kitchTap2Val;
 int tap1MidiVal, tap1Brightness;
 int tap2MidiVal, tap2Brightness;
 
+
+
 void setup() {
 
 #ifdef DEBUG
@@ -62,7 +64,7 @@ void loop() {
   if (p1OverTimes > 10) {
     kitchTap1Val = p1v;
     tap1MidiVal = map(kitchTap1Val, 0, 1024, 0, 127);
-    sendMidi(CONTROL_CHANGE, 1, kitchTap1CCNumber, tap1MidiVal);
+    sendMidi(CONTROL_CHANGE, 1, kitchTap1CCNumber, map(tap1MidiVal, 35, 81, 0, 127));
     tap1Brightness = 255;
     strip.setPixelColor(tap1MidiVal % 24, 255, 255, 255);
   }
@@ -82,7 +84,7 @@ void loop() {
   if (p2OverTimes > 10) {
     kitchTap2Val = p2v;
     tap2MidiVal = map(kitchTap2Val, 0, 1024, 0, 127);
-    sendMidi(CONTROL_CHANGE, 1, kitchTap2CCNumber, tap2MidiVal);
+    sendMidi(CONTROL_CHANGE, 1, kitchTap2CCNumber, map(tap2MidiVal, 34, 78, 0, 127));
     tap2Brightness = 255;
   }
   

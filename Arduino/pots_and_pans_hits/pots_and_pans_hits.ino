@@ -7,7 +7,7 @@
 
 const int hitPins[7] = { 2, 3, 4, 5, 6, 7, 8 };
 const int numPins = sizeof(hitPins) / sizeof(int);
-const int noteNumbers[] = { 53, 54, 55, 56, 57, 58, 59 };
+const int noteNumbers[] = { 37, 38, 39, 40, 41, 42, 59 };
 
 enum state_t { ON, OFF };
 state_t states[numPins];
@@ -15,7 +15,7 @@ state_t states[numPins];
 unsigned long lastHits[numPins];
 const unsigned long HIT_THRESHOLD = 20; // millis
 
-const unsigned long NOTE_DURATION = 120;
+const unsigned long NOTE_DURATION = 50;
 
 const int LED_PIN = 13;
 

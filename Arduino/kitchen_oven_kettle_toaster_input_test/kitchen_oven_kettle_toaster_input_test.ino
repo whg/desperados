@@ -13,7 +13,8 @@
 const int setStartButton = 2;
 const int setEndButton = 3;
 
-const int ovenEncoder2CCNumber = 23; // encoder 1 is pitch bend
+const int ovenEncoder1CCNumber = 29;
+const int ovenEncoder2CCNumber = 23;
 const int ovenPot1CCNumber = 20;
 const int ovenPot2CCNumber = 21;
 const int toasterCCNumber = 70                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ;
@@ -121,14 +122,17 @@ void loop() {
   }
 
   if (encoder1Changed && ENCODER_VAL_SET(ovenEncoder1Start) && ENCODER_VAL_SET(ovenEncoder1End)) {
-    uint16_t value = constrain(map(ovenEncoder1Pos, ovenEncoder1Start, ovenEncoder1End, 0, 0x2000), 0, 0x2000);
+    uint8_t value = constrain(map(ovenEncoder1Pos, ovenEncoder1Start, ovenEncoder1End, 0, 127), 0, 127);
+    sendMidi(CONTROL_CHANGE, 5, ovenEncoder1CCNumber, value);
+    
+//    uint16_t value = constrain(map(ovenEncoder1Pos, ovenEncoder1Start, ovenEncoder1End, 0, 0x2000), 0, 0x2000);
 #ifdef DEBUG
     Serial.print("pos: ");
     Serial.println(ovenEncoder1Pos);
     Serial.print("value: ");
     Serial.println(value);
 #else
-    sendPitchBend(1, value);
+//    sendPitchBend(1, value);
 #endif
 
   }

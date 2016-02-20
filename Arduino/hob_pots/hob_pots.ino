@@ -1,4 +1,10 @@
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
 
+#define PIN 2
+#define NUMPIXELS      16
 #define CONTROL_CHANGE 0b10110000
 // 1024 / 127 = 8
 #define KNOB_THRESHOLD 8
@@ -12,6 +18,20 @@ const int hobPot1Pin = A0;
 const int hobPot2Pin = A3;
 int hobPot1Val, hobPot2Val;
 
+const int vuMeterPin = A1;
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+static uint32_t vuColours[8] {
+    pixels.Color(0, 255, 0),
+    pixels.Color(0, 255, 0),
+    pixels.Color(255, 255, 0),
+    pixels.Color(255, 255, 0),
+    pixels.Color(255, 255, 0),
+    pixels.Color(255, 255, 0),
+    pixels.Color(255, 0, 0),
+    pixels.Color(255, 0, 0)
+  };
+
 void setup() {
 
 #ifdef DEBUG
@@ -22,13 +42,15 @@ void setup() {
 
   pinMode(hobPot1Pin, INPUT);
   pinMode(hobPot2Pin, INPUT);
-
+  pinMode(vuMeterPin, INPUT);
+  
   hobPot1Val = hobPot2Val = 0;
+  
+  pixels.begin();
 }
 
 
 void loop() {
-
   
   int p1v = analogRead(hobPot1Pin);
   static int p1OverTimes = 0;
@@ -60,6 +82,15 @@ void loop() {
   if (p2OverTimes > 10) {
     hobPot2Val = p2v;
     sendMidi(CONTROL_CHANGE, 1, hobPot2CCNumber, map(hobPot2Val, 0, 1024, 0, 127));
+  }
+
+  int vuMeterReading = map(analogRead(vuMeterPin), 0, 800, 0, 8);
+  uint32_t col;
+  for (int i = 0; i < 8; i++) {
+    if (i < vuMeterReading) col = vuColours[i];
+    else col = 0;
+    pixels.setPixelColor(i, col);
+    pixels.setPixelColor(8 + i, col);
   }
 
   delay(1);

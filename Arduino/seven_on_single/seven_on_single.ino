@@ -190,8 +190,8 @@ void mainTimer() {
     counter = counter % NUM_COLS;
 
     if (!(frameCount % NUM_FRAMES_IN_SEC)) {
-      centralTime(8888);
-//      centralTime(analogVal * 10);
+//      centralTime(8888);
+      centralTime(analogVal * 10);
     }
 
   }

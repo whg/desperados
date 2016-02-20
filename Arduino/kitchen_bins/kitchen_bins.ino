@@ -15,11 +15,11 @@ byte states[NPINS];
 
 void setup() {
 
-  Serial.begin(31250);
+  Serial.begin(31250 );
 
   for (int i = 0; i < NPINS; i++) {
-    pinMode(pins[i], INPUT_PULLUP);
-    states[i] = LOW;
+    pinMode(pins[i], INPUT);
+    states[i] = HIGH;
   }
 }
 
@@ -27,14 +27,14 @@ void loop() {
   
   for (int i = 0; i < NPINS; i++) {
     int v = digitalRead(pins[i]);
-    if (v == LOW && states[i] != LOW) {
+    if (v == HIGH && states[i] == LOW) {
       sendMidi(NOTE_ON, channels[i], notes[i], 127);
-      states[i] = LOW;
+      states[i] = HIGH;
       delay(HOLD_TIME);  
     }
-    else if (v == HIGH && states[i] == LOW) {
+    else if (v == LOW && states[i] == HIGH) {
       sendMidi(NOTE_OFF, channels[i], notes[i], 0);
-      states[i] = HIGH;
+      states[i] = LOW;
       delay(HOLD_TIME);
       
     }

@@ -45,7 +45,7 @@ void loop() {
 
     if (states[i] == OFF && digitalRead(hitPins[i]) == 0) {
       if ((timeNow - lastHits[i]) > NOTE_DURATION && states[i] == OFF) {
-        sendMidi(NOTE_ON, 1, noteNumbers[i], 120);
+        sendMidi(NOTE_ON, 1, noteNumbers[i], 80);
         lastHits[i] = timeNow;
         states[i] = ON;
         digitalWrite(LED_PIN, HIGH);

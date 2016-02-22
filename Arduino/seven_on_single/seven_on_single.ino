@@ -3,7 +3,7 @@ volatile uint16_t secondsElapsed = 0, frameCount = 0, c2 = 0;
 #include <TimerOne.h>
 #include "data.h"
 
-#define MAX_ANALOG_VAL 788
+#define MAX_ANALOG_VAL 1013
 
 volatile uint16_t globalTime = 700;
 
@@ -37,7 +37,7 @@ int clearPin = A4;
 int shift = 0;
 char *message = "HELO";
 
-uint8_t meterInPin = A5;
+uint8_t meterInPin = A6;
 uint16_t analogVal;
 
 #define NLEDS 2
@@ -120,7 +120,7 @@ void loop() {
     }
   }
   
-  analogVal = analogRead(meterInPin);
+  analogVal = map(analogRead(meterInPin), 0, MAX_ANALOG_VAL, 0, 7283);
 }
 
 void lightDigits(uint8_t col) {
@@ -191,7 +191,7 @@ void mainTimer() {
 
     if (!(frameCount % NUM_FRAMES_IN_SEC)) {
 //      centralTime(8888);
-      centralTime(analogVal * 10);
+      centralTime(analogVal);
     }
 
   }

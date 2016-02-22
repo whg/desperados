@@ -44,7 +44,7 @@ void loop() {
   for (uint8_t i = 0; i < numPins; i++) {
     if (states[i] == OFF && analogRead(hitPins[i]) > 500) {
       if ((timeNow - lastHits[i]) > NOTE_DURATION) {
-        sendMidi(NOTE_ON, midiChannel, noteNumbers[i], 120);
+        sendMidi(NOTE_ON, midiChannel, noteNumbers[i], 80);
         lastHits[i] = timeNow;
         states[i] = ON;
        // Serial.println(analogRead(hitPins[i]));
@@ -62,8 +62,6 @@ void loop() {
     }
   }
 
-  
-  delay(1);
 }
 
 void sendMidi(uint8_t type, uint8_t channel, uint8_t byte1, uint8_t byte2) {

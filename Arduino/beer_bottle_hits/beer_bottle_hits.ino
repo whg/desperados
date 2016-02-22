@@ -50,7 +50,7 @@ void loop() {
 //    
     if (states[i] == OFF && digitalRead(hitPins[i]) == 0) {
       if ((timeNow - lastHits[i]) > NOTE_DURATION) {
-        sendMidi(NOTE_ON, midiChannel, noteNumbers[i], 120);
+        sendMidi(NOTE_ON, midiChannel, noteNumbers[i], 80);
         lastHits[i] = timeNow;
         states[i] = ON;
         

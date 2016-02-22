@@ -199,10 +199,6 @@ void loop() {
     sendMidi(CONTROL_CHANGE, 1, kettleCCNumber, kv == LOW ? 127 : 0);
   }
 
-
-
-
-
 }
 
 void sendMidi(uint8_t type, uint8_t channel, uint8_t byte1, uint8_t byte2) {

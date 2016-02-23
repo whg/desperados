@@ -115,15 +115,16 @@
 
 const int hitPins[] = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, A2, A0, A1 };
 const int numPins = sizeof(hitPins) / sizeof(int);
-const int noteNumbers[] = { B2, D3, E3, Fs3, nA3, B3, B3, D4, E4, Fs4, nA4, B4, D5 };
-
+//const int noteNumbers[] = { B2, D3, E3, Fs3, nA3, B3, B3, D4, E4, Fs4, nA4, B4, D5 };
+const int noteNumbers[] = { D5, B4, nA4, Fs4, E4, D4, B3, B3, nA3, Fs3, E3, D3, B2 };
+const int channel = 7;
 enum state_t { ON, OFF };
 state_t states[numPins];
 
 unsigned long lastHits[numPins];
 const unsigned long HIT_THRESHOLD = 20; // millis
 
-const unsigned long NOTE_DURATION = 50;
+const unsigned long NOTE_DURATION = 100;
 
 const int LED_PIN = 13;
 
@@ -153,7 +154,7 @@ void loop() {
 
     if (states[i] == OFF && digitalRead(hitPins[i]) == LOW) {
       if ((timeNow - lastHits[i]) > NOTE_DURATION) {
-        sendMidi(NOTE_ON, 1, noteNumbers[i], 80);
+        sendMidi(NOTE_ON, channel, noteNumbers[i], 80);
         lastHits[i] = timeNow;
         states[i] = ON;
         digitalWrite(LED_PIN, HIGH);
@@ -162,10 +163,10 @@ void loop() {
   }
   
   for (uint8_t i = 0; i < numPins; i++) {
-    if (states[i] == ON && (timeNow - lastHits[i]) > NOTE_DURATION) {
-      sendMidi(NOTE_OFF, 1, noteNumbers[i], 0);
+    if (states[i] == ON && (timeNow - lastHits[i]) > NOTE_DURATION  && digitalRead(hitPins[i]) == HIGH) {
+      sendMidi(NOTE_OFF, channel, noteNumbers[i], 0);
       states[i] = OFF;
-
+      lastHits[i] = timeNow;
       digitalWrite(LED_PIN, LOW);
     }
   }
